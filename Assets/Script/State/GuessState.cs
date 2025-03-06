@@ -8,13 +8,11 @@ public class GuessState : GameState
     public GuessState(GameManager manager) : base(manager)
     {
         Debug.Log("GuessState");
-
     }
 
     public override void EnterState()
     {
         gameManager.EnableCardInteraction(true);
-        
     }
 
     public override void OnCardClicked(Card card)

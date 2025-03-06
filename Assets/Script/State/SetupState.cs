@@ -12,7 +12,7 @@ public class SetupState : GameState
 
     public override void EnterState()
     {
-        gameManager.ShuffleCards();
+        //gameManager.ShuffleCards();
         gameManager.SetTargetCards();
         gameManager.ShowAllCards();
 

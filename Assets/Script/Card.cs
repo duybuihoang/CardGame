@@ -1,4 +1,5 @@
 using DG.Tweening;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,16 +7,18 @@ using UnityEngine;
 public class Card : MonoBehaviour
 {
     [SerializeField] public Sprite hiddenSprite;
-    [SerializeField] public Sprite revealedSprite;
+    private Sprite revealedSprite;
     private SpriteRenderer currentSprite;
 
-    private bool isTarget = false;
+    public bool isTarget = false;
     private Vector3 initialPosition;
 
     [SerializeField] private float flipDuration = 0.3f;
 
     public bool IsTarget { get => isTarget; set => isTarget = value; }
     public Vector3 InitialPosition { get => initialPosition; set => initialPosition = value; }
+
+    public event Action<Card> onCardSelected;
 
 
     private void Awake()
@@ -25,13 +28,28 @@ public class Card : MonoBehaviour
         currentSprite.sprite = hiddenSprite;
     }
 
-   public void FlipCard(bool faceUp)
-   {
-        transform.DORotate(new Vector3( faceUp ? -135f : -45f,0, 0), flipDuration).SetEase(Ease.InOutQuad);
-   }
+    public void FlipCard(bool faceUp)
+    {
+        currentSprite.sprite = faceUp ? revealedSprite : hiddenSprite;
+    }
+
+    public void SetRevealedCardSprite(Sprite sprite)
+    {
+        revealedSprite = sprite;
+    }
 
     private void OnDestroy()
     {
         DOTween.Kill(transform);
+    }
+
+    private void OnMouseEnter()
+    {
+        Debug.Log(this.name);
+    }
+
+    private void OnMouseDown()
+    {
+        onCardSelected?.Invoke(this);
     }
 }

@@ -7,9 +7,17 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     [SerializeField] private List<Card> cards;
+
     [SerializeField] private float swapDuration = 0.5f;
+    [SerializeField] private float moveDuration = 0.5f;
+
     [SerializeField] private Ease swapEase = Ease.InOutQuad;
+    [SerializeField] private Ease moveEase = Ease.InSine;
+
     [SerializeField] private float cardMoveHeight = 0.1f;
+
+    [SerializeField] private Sprite targetCardSprite;
+    [SerializeField] private Sprite normalCardSprite;
 
     private GameState currentState;
     private List<GameObserver> observers = new List<GameObserver>();
@@ -18,6 +26,14 @@ public class GameManager : MonoBehaviour
     {
         DOTween.SetTweensCapacity(500, 10);
         ChangeState(new SetupState(this));
+    }
+
+    private void OnEnable()
+    {
+        foreach (var card in cards)
+        {
+            card.onCardSelected += currentState.OnCardClicked;
+        }
     }
 
     public void ChangeState(GameState state)
@@ -68,15 +84,15 @@ public class GameManager : MonoBehaviour
         {
             posA,
             posA + Vector3.up* cardMoveHeight, 
-            posA + Vector3.up*cardMoveHeight, 
+            posB + Vector3.up* cardMoveHeight, 
             posB
         };
 
         Vector3[] pathB = new Vector3[]
         {
             posB,
-            posB + Vector3.up*-cardMoveHeight,
-            posB + Vector3.up*-cardMoveHeight,
+            posB + Vector3.up* -cardMoveHeight,
+            posA + Vector3.up* -cardMoveHeight,
             posA
         };
 
@@ -91,9 +107,31 @@ public class GameManager : MonoBehaviour
         int targetIndex = Random.Range(0, cards.Count);
         for (int i = 0; i < cards.Count; i++)
         {
-            cards[i].IsTarget = (i == targetIndex);
+            if(i == targetIndex)
+            {
+                cards[i].IsTarget = (i == targetIndex);
+                cards[i].SetRevealedCardSprite(targetCardSprite);
+            }
+            else
+            {
+                cards[i].SetRevealedCardSprite(normalCardSprite);
+            }
         }
+        MoveTargetCardUp(targetIndex);
     }
+
+    public void MoveTargetCardUp(int targetIndex)
+    {
+        
+        Vector3[] path = new Vector3[]
+        {
+            cards[targetIndex].transform.position + new Vector3(0, cardMoveHeight, 0),
+            cards[targetIndex].transform.position
+        };
+
+        cards[targetIndex].transform.DOPath(path, moveDuration, PathType.CatmullRom, PathMode.TopDown2D).SetEase(moveEase);
+    }
+
     public void ShowAllCards() {
         foreach (var item in cards)
         {
@@ -105,7 +143,7 @@ public class GameManager : MonoBehaviour
     {
         foreach (var item in cards)
         {
-            item.FlipCard(false);
+           item.FlipCard(false);
         }
     }
 
