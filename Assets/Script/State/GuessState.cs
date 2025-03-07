@@ -13,6 +13,7 @@ public class GuessState : GameState
     public override void EnterState()
     {
         gameManager.EnableCardInteraction(true);
+        gameManager.BindCardClickedEvent(OnCardClicked);
     }
 
     public override void OnCardClicked(Card card)

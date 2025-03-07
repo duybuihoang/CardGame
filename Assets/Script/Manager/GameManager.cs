@@ -1,6 +1,8 @@
 using DG.Tweening;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 
@@ -26,14 +28,6 @@ public class GameManager : MonoBehaviour
     {
         DOTween.SetTweensCapacity(500, 10);
         ChangeState(new SetupState(this));
-    }
-
-    private void OnEnable()
-    {
-        foreach (var card in cards)
-        {
-            card.onCardSelected += currentState.OnCardClicked;
-        }
     }
 
     public void ChangeState(GameState state)
@@ -67,7 +61,7 @@ public class GameManager : MonoBehaviour
     {
         for (int i = 0; i < cards.Count; i++)
         {
-            int randomIndex = Random.Range(0, i - 1);
+            int randomIndex = UnityEngine.Random.Range(0, i - 1);
             SwapCards(0, randomIndex);
         }
     }
@@ -100,11 +94,17 @@ public class GameManager : MonoBehaviour
 
         cardB.transform.DOPath(pathB, swapDuration, PathType.CatmullRom, PathMode.TopDown2D).SetEase(swapEase);
 
-
     }
+    public void BindCardClickedEvent(Action<Card> action)
+    {
+        foreach (var card in cards)
+        {
+            card.onCardSelected += action;
+        }
+    }    
     public void SetTargetCards()
     {
-        int targetIndex = Random.Range(0, cards.Count);
+        int targetIndex = UnityEngine.Random.Range(0, cards.Count);
         for (int i = 0; i < cards.Count; i++)
         {
             if(i == targetIndex)
