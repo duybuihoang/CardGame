@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -120,8 +121,74 @@ public class DialogManager : MonoBehaviour
         if(currentNode.choices == null && currentNode.choices.Count > 0)
         {
             choicesPanel.SetActive(true);
+            foreach (var choice in currentNode.choices)
+            {
+                Button choiceButton = Instantiate(choiceButtonPrefab, choicesPanel.transform);
+                choiceButton.GetComponentInChildren<Text>().text = choice.choiceText;
+                choiceButton.onClick.AddListener(() =>
+                {
+                    if(choice.storyVariantFlag != 0 )
+                    {
+                        storyFlags.Add(choice.storyVariantFlag);
+                    }
+
+                    if (dialogNodes.TryGetValue(choice.nextNodeID, out DialogNode nextNode))
+                    {
+                        currentNode = nextNode;
+                        DisplayCurrentNode();
+                    }
+                    else
+                    {
+                        EndDialog();
+                    }    
+                });
+            }
 
         }
+        else
+        {
+            choicesPanel.SetActive(false);
+        }
+
+        if (currentNode.isEndNode)
+        {
+            Button endButton = Instantiate(choiceButtonPrefab, choicesPanel.transform);
+            endButton.GetComponentInChildren<Text>().text = "End Conversation";
+            endButton.onClick.AddListener(EndDialog);
+            choicesPanel.SetActive(true);
+        }
+    }
+
+    public void OnContinueClick()
+    {
+        if(!isDialogActive || choicesPanel.activeSelf)
+        {
+            return;
+        }
+        if(!string.IsNullOrEmpty(currentNode.nextNodeID))
+        {
+            if(dialogNodes.TryGetValue(currentNode.nextNodeID, out DialogNode nextNode))
+            {
+                currentNode = nextNode;
+                DisplayCurrentNode();
+            }
+            else
+            {
+                EndDialog();
+            }
+        }
+        else if(currentNode.isEndNode)
+        {
+            EndDialog();
+        }
+    }
+
+    private void EndDialog()
+    {
+        isDialogActive = false;
+        dialogPanel.SetActive(false);
+        OnDialogComplete?.Invoke(storyFlags);
+        storyFlags.Clear();
     }
 
 }
