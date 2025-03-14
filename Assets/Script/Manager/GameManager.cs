@@ -68,6 +68,8 @@ public class GameManager : MonoBehaviour
 
     public void SwapCards(int idx1, int idx2)
     {
+        if (idx1 == idx2) return;
+
         Card cardA = cards[idx1];
         Card cardB = cards[idx2];
 
@@ -91,10 +93,8 @@ public class GameManager : MonoBehaviour
         };
 
         cardA.transform.DOPath(pathA, swapDuration, PathType.CatmullRom,PathMode.TopDown2D).SetEase(swapEase);
-
         cardB.transform.DOPath(pathB, swapDuration, PathType.CatmullRom, PathMode.TopDown2D).SetEase(swapEase);
-
-    }
+    } 
     public void BindCardClickedEvent(Action<Card> action)
     {
         foreach (var card in cards)
